@@ -27,7 +27,20 @@ namespace databseApp.Controllers
         // GET: Product
         public IActionResult Index()
         {
-            return View();
+            MySqlDataAdapter daProducts;
+            DataTable dtbl = new DataTable();
+     
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                string sql = "SELECT * FROM Products";
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+                
+           
+            }
+            return View(dtbl);
         }
 
 
@@ -110,11 +123,34 @@ namespace databseApp.Controllers
 
         }
 
+        public ProductViewModel FetchProductByID(string? id)
+        {
+            ProductViewModel productViewModel = new ProductViewModel();
+            using (SqlConnection sqlConnection = new SqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                DataTable dtbl = new DataTable();
+                sqlConnection.Open();
+                SqlDataAdapter sqlDa = new SqlDataAdapter("ProductViewByID", sqlConnection);
+                sqlDa.SelectCommand.CommandType = CommandType.StoredProcedure;
+                sqlDa.SelectCommand.Parameters.AddWithValue("Product_id", id);
+                sqlDa.Fill(dtbl);
+                if(dtbl.Rows.Count == 1)
+                {
+                    productViewModel.ProductId = Convert.ToInt32(dtbl.Rows[0]["product_id"].ToString());
+                    productViewModel.Size = dtbl.Rows[0]["size"].ToString();
+                   // productViewModel.Price = dtbl.Rows[0]["price"].ToString();
+                   // productViewModel.Price = dtbl.Rows[0]["name"].ToString();
+
+                }
+                return productViewModel;
+            }
+        }
+
         // GET: Product/Delete/5
         public IActionResult Delete(string id)
         {
-
-            return View();
+            ProductViewModel productViewModel = FetchProductByID(id);
+            return View(productViewModel);
         }
 
         // POST: Product/Delete/5
