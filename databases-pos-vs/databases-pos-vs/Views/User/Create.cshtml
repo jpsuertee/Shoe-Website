@@ -1,28 +1,39 @@
-@model IEnumerable<databseApp.Models.UserViewModel>
-
-	@{
+@model databseApp.Models.UserViewModel
+@{
     ViewData["Title"] = "Create";
-	}
+}
 
 <section class="loginform cf">
-<form name="login" action="index_submit" method="get" accept-charset="utf-8">
-	<ul>
-		<li>
-			<label for="usermail">Email</label>
-			<input type="email" name="usermail" placeholder="yourname@email.com" required>
-		</li>
-		<li>
-			<label for="password">Password</label>
-			<input type="password" name="password" placeholder="password" required>
-			
-			<br /><br />
-			<select>
-				<option value="" style="display:none">Choose an account</option>
-				<option value="1">Customer</option>
-				<option value="2">Employee</option>
-			</select>
-			<br/>
-			<input type="submit" value="Next">
-	</ul>
-</form>
+    <form asp-action="Create">
+        <ul>
+            <li>
+                <label asp-for="FirstName_">First Name</label>
+                <input asp-for="FirstName_" type="text" name="FirstName" placeholder="John" required>
+            </li>
+            <li>
+                <label asp-for="LastName_">LastName</label>
+                <input asp-for="LastName_" type="text" name="LastName" placeholder="Smith" required>
+            </li>
+
+            <li>
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" name="Email" placeholder="yourname@email.com" required>
+            </li>
+            <li>
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" type="password" name="Password" placeholder="password" required>
+
+                <br /><br />
+                <select asp-for="Role">
+                    <option value="" style="display:none">Choose an account</option>
+                    <option value="1">Customer</option>
+                    <option value="2">Employee</option>
+                </select>
+                <br />
+                <input type="submit" value="Next">
+        </ul>
+    </form>
 </section>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

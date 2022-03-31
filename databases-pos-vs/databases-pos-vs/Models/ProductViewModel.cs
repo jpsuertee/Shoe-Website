@@ -17,5 +17,6 @@ namespace databseApp.Models
 
         public int Category_id { get; set; }
         public int Vendor_id { get; set; }
+        public int times_sold { get; set; }
     }
 }

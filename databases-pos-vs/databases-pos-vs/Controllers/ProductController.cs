@@ -44,23 +44,12 @@ namespace databseApp.Controllers
         }
 
 
-        //// GET: Product/Details/5
-        //public async Task<IActionResult> Details(string id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var productViewModel = await _context.ProductViewModel
-        //        .FirstOrDefaultAsync(m => m.ProductId == id);
-        //    if (productViewModel == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(productViewModel);
-        //}
+        //GET: Product/Details/5
+        public async Task<IActionResult> Details(string id)
+        {
+            ProductViewModel productViewModel = FetchProductByID(id);
+            return View(productViewModel);
+        }
 
         //// GET: Product/Create
         //public IActionResult Create()
@@ -123,6 +112,9 @@ namespace databseApp.Controllers
 
         }
 
+ 
+
+
         public ProductViewModel FetchProductByID(string? id)
         {
 
@@ -147,6 +139,7 @@ namespace databseApp.Controllers
                     //productViewModel.Price = Convert.ToFl(dtbl.Rows[0]["price"].ToString()); //Cant convert this for some reason 
                     productViewModel.Price = 3;
                     productViewModel.Name = dtbl.Rows[0]["name"].ToString();
+                    productViewModel.times_sold = Convert.ToInt32(dtbl.Rows[0]["times_sold"].ToString());
 
 
                 }
@@ -173,9 +166,6 @@ namespace databseApp.Controllers
                 sqlCmd.CommandType = CommandType.StoredProcedure;
                 sqlCmd.Parameters.AddWithValue("@Product_id", id);
                 sqlCmd.ExecuteNonQuery();
-
-
-
             }
 
             return RedirectToAction(nameof(Index));
