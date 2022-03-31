@@ -16,16 +16,18 @@ namespace databseApp.Controllers
 {
     public class UserController : Controller
     {
+        private readonly IConfiguration _configuration;
+
+        public UserController(IConfiguration configuration)
+        {
+            this._configuration = configuration;
+        }
         //private readonly databseAppContext _context;
 
         public bool logged_in = false;
         //NOTE: this variable will be used to determined if logged in or not
 
 
-        public UserController(/*databseAppContext context*/)
-        {
-            
-        }
 
         // GET: User
         public IActionResult UserIndex()
@@ -34,11 +36,37 @@ namespace databseApp.Controllers
             //function to go to account settings/reports
         }
 
-        // GET: User/Create/?
+
+        // GET:
         public IActionResult Create()
         {
-            UserViewModel userviewmodel = new UserViewModel();
-            return View();
+            UserViewModel userViewModel = new UserViewModel();
+            return View(userViewModel);
+        }
+
+        // POST: User/Create/?
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role")] UserViewModel userViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+                {
+                    sqlConnection.Open();
+                    MySqlCommand sqlCmd = new MySqlCommand("CreateNewUser", sqlConnection);
+                    sqlCmd.CommandType = CommandType.StoredProcedure;
+                    sqlCmd.Parameters.AddWithValue("@FirstName_", userViewModel.FirstName_);
+                    sqlCmd.Parameters.AddWithValue("@LastName_", userViewModel.FirstName_);
+                    sqlCmd.Parameters.AddWithValue("@Email", userViewModel.Email);
+                    sqlCmd.Parameters.AddWithValue("@Password", userViewModel.Password);
+                    sqlCmd.Parameters.AddWithValue("@Role", userViewModel.Role);
+
+                    sqlCmd.ExecuteNonQuery();
+                }
+                return RedirectToAction(nameof(Index)); //redirects to either Customer or Employee forms 
+            }
+            return View(userViewModel);
         }
 
         /*
