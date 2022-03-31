@@ -1,83 +1,80 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using databases_pos_vs.Data;
 using databseApp.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using MySql.Data.MySqlClient;
 
-namespace databases_pos_vs.Controllers
+namespace databseApp.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly databases_pos_vsContext _context;
+        private readonly IConfiguration _configuration;
 
-        public ProductController(databases_pos_vsContext context)
+        public ProductController(IConfiguration configuration)
         {
-            _context = context;
+            this._configuration = configuration;
+
         }
 
         // GET: Product
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.ProductViewModel.ToListAsync());
-        }
-
-        // GET: Product/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productViewModel = await _context.ProductViewModel
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (productViewModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(productViewModel);
-        }
-
-        // GET: Product/Create
-        public IActionResult Create()
+        public IActionResult Index()
         {
             return View();
         }
 
-        // POST: Product/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,Size,Price,Name,Category_id,Vendor_id")] ProductViewModel productViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(productViewModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(productViewModel);
-        }
 
-        // GET: Product/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //// GET: Product/Details/5
+        //public async Task<IActionResult> Details(string id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var productViewModel = await _context.ProductViewModel.FindAsync(id);
-            if (productViewModel == null)
-            {
-                return NotFound();
-            }
+        //    var productViewModel = await _context.ProductViewModel
+        //        .FirstOrDefaultAsync(m => m.ProductId == id);
+        //    if (productViewModel == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(productViewModel);
+        //}
+
+        //// GET: Product/Create
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
+
+        //// POST: Product/Create
+        //// To protect from overposting attacks, enable the specific properties you want to bind to.
+        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(productViewModel);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(productViewModel);
+        //}
+
+        // GET: Product/Edit/
+        public IActionResult Edit(string id)
+        {
+            ProductViewModel productViewModel = new ProductViewModel();
             return View(productViewModel);
         }
 
@@ -86,68 +83,49 @@ namespace databases_pos_vs.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Size,Price,Name,Category_id,Vendor_id")] ProductViewModel productViewModel)
+        public IActionResult Edit(string id, [Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
         {
-            if (id != productViewModel.ProductId)
-            {
-                return NotFound();
-            }
+
 
             if (ModelState.IsValid)
             {
-                try
+                using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
                 {
-                    _context.Update(productViewModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductViewModelExists(productViewModel.ProductId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    sqlConnection.Open();
+                    MySqlCommand sqlCmd = new MySqlCommand("ProductsAddOrEdit", sqlConnection);
+                    sqlCmd.CommandType = CommandType.StoredProcedure;
+                    sqlCmd.Parameters.AddWithValue("@Product_id", productViewModel.ProductId);
+                    sqlCmd.Parameters.AddWithValue("@Size", productViewModel.Size);
+                    sqlCmd.Parameters.AddWithValue("@Price", productViewModel.Price);
+                    sqlCmd.Parameters.AddWithValue("@Name", productViewModel.Name);
+                    sqlCmd.Parameters.AddWithValue("@Category_id", productViewModel.Category_id);
+                    sqlCmd.Parameters.AddWithValue("@Vendor_id", productViewModel.Vendor_id);
+
+                    sqlCmd.ExecuteNonQuery();
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(productViewModel);
+
+
         }
 
         // GET: Product/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var productViewModel = await _context.ProductViewModel
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (productViewModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(productViewModel);
+            return View();
         }
 
         // POST: Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(string id)
         {
-            var productViewModel = await _context.ProductViewModel.FindAsync(id);
-            _context.ProductViewModel.Remove(productViewModel);
-            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductViewModelExists(int id)
-        {
-            return _context.ProductViewModel.Any(e => e.ProductId == id);
-        }
+
     }
 }
