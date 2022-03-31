@@ -27,7 +27,20 @@ namespace databseApp.Controllers
         // GET: Product
         public IActionResult Index()
         {
-            return View();
+            MySqlDataAdapter daProducts;
+            DataTable dtbl = new DataTable();
+     
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                string sql = "SELECT * FROM Products";
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+                
+           
+            }
+            return View(dtbl);
         }
 
 
@@ -110,11 +123,42 @@ namespace databseApp.Controllers
 
         }
 
+        public ProductViewModel FetchProductByID(string? id)
+        {
+
+            ProductViewModel productViewModel = new ProductViewModel();
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                MySqlDataAdapter daProducts;
+                DataTable dtbl = new DataTable();
+
+                sqlConnection.Open();
+                var sql = string.Format("SELECT * FROM Products WHERE Products.product_id = {0}", id);
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+
+
+                if (dtbl.Rows.Count == 1)
+                {
+                    productViewModel.ProductId = Convert.ToInt32(dtbl.Rows[0]["product_id"].ToString());
+                    productViewModel.Size = dtbl.Rows[0]["size"].ToString();
+                    
+                    //productViewModel.Price = Convert.ToFl(dtbl.Rows[0]["price"].ToString()); //Cant convert this for some reason 
+                    productViewModel.Price = 3;
+                    productViewModel.Name = dtbl.Rows[0]["name"].ToString();
+
+
+                }
+                return productViewModel;
+            }
+        }
+
         // GET: Product/Delete/5
         public IActionResult Delete(string id)
         {
-
-            return View();
+            ProductViewModel productViewModel = FetchProductByID(id);
+            return View(productViewModel);
         }
 
         // POST: Product/Delete/5
@@ -122,6 +166,17 @@ namespace databseApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(string id)
         {
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                MySqlCommand sqlCmd = new MySqlCommand("ProductDeleteByID", sqlConnection);
+                sqlCmd.CommandType = CommandType.StoredProcedure;
+                sqlCmd.Parameters.AddWithValue("@Product_id", id);
+                sqlCmd.ExecuteNonQuery();
+
+
+
+            }
 
             return RedirectToAction(nameof(Index));
         }
