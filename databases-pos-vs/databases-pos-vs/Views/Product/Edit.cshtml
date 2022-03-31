@@ -1,12 +1,12 @@
 ﻿@model databseApp.Models.ProductViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = Model.ProductId == 0 ? "Create Product" : "Update Product";
 }
 
-<h1>Edit</h1>
+<h1>@ViewData["Title"]</h1>
 
-<h4>ProductViewModel</h4>
+
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -29,17 +29,7 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Category_id" class="control-label"></label>
-                <input asp-for="Category_id" class="form-control" />
-                <span asp-validation-for="Category_id" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Vendor_id" class="control-label"></label>
-                <input asp-for="Vendor_id" class="form-control" />
-                <span asp-validation-for="Vendor_id" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Submit" class="btn btn-primary" />
             </div>
         </form>
     </div>
