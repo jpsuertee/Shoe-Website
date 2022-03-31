@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="text-center">
+	<h1>@ViewData["Title"]</h1>
+	<p><input type="email" placeholder="Email"></p>
+	<p><input type="password" placeholder="Password"></p>
+	<p><input type="submit" value="Login"></p>
+	<div class="create-account">
+		<a asp-area="" asp-controller="User" asp-action="Create">Create account</a>
+	</div>
+</div>
