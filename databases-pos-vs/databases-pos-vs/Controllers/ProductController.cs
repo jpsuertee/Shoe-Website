@@ -125,21 +125,29 @@ namespace databseApp.Controllers
 
         public ProductViewModel FetchProductByID(string? id)
         {
+
             ProductViewModel productViewModel = new ProductViewModel();
-            using (SqlConnection sqlConnection = new SqlConnection(_configuration.GetConnectionString("DevConnection")))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
             {
+                MySqlDataAdapter daProducts;
                 DataTable dtbl = new DataTable();
+
                 sqlConnection.Open();
-                SqlDataAdapter sqlDa = new SqlDataAdapter("ProductViewByID", sqlConnection);
-                sqlDa.SelectCommand.CommandType = CommandType.StoredProcedure;
-                sqlDa.SelectCommand.Parameters.AddWithValue("Product_id", id);
-                sqlDa.Fill(dtbl);
-                if(dtbl.Rows.Count == 1)
+                var sql = string.Format("SELECT * FROM Products WHERE Products.product_id = {0}", id);
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+
+
+                if (dtbl.Rows.Count == 1)
                 {
                     productViewModel.ProductId = Convert.ToInt32(dtbl.Rows[0]["product_id"].ToString());
                     productViewModel.Size = dtbl.Rows[0]["size"].ToString();
-                   // productViewModel.Price = dtbl.Rows[0]["price"].ToString();
-                   // productViewModel.Price = dtbl.Rows[0]["name"].ToString();
+                    
+                    //productViewModel.Price = Convert.ToFl(dtbl.Rows[0]["price"].ToString()); //Cant convert this for some reason 
+                    productViewModel.Price = 3;
+                    productViewModel.Name = dtbl.Rows[0]["name"].ToString();
+
 
                 }
                 return productViewModel;
@@ -158,6 +166,17 @@ namespace databseApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(string id)
         {
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                MySqlCommand sqlCmd = new MySqlCommand("ProductDeleteByID", sqlConnection);
+                sqlCmd.CommandType = CommandType.StoredProcedure;
+                sqlCmd.Parameters.AddWithValue("@Product_id", id);
+                sqlCmd.ExecuteNonQuery();
+
+
+
+            }
 
             return RedirectToAction(nameof(Index));
         }
