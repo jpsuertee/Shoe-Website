@@ -17,34 +17,34 @@ namespace databseApp.Controllers
     public class UserController : Controller
     {
         private readonly IConfiguration _configuration;
-
         public UserController(IConfiguration configuration)
         {
             this._configuration = configuration;
         }
-        //private readonly databseAppContext _context;
 
         public bool logged_in = false;
-        //NOTE: this variable will be used to determined if logged in or not
 
 
-
-        // GET: User
+        // GET: User Login
         public IActionResult UserIndex()
         {
+            //UserViewModel account = new UserViewModel();
             return View();
-            //function to go to account settings/reports
         }
-
-
-        // GET:
+        /*
+        [HttpGet]
+        public IActionResult UserIndex()
+        {
+            
+            return View();
+        }*/
+        
+        // POST: User/Create/?
         public IActionResult Create()
         {
             UserViewModel userViewModel = new UserViewModel();
             return View(userViewModel);
         }
-
-        // POST: User/Create/?
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role")] UserViewModel userViewModel)
@@ -64,10 +64,17 @@ namespace databseApp.Controllers
 
                     sqlCmd.ExecuteNonQuery();
                 }
-                return RedirectToAction(nameof(Index)); //redirects to either Customer or Employee forms 
+                 //redirects to either Customer or Employee forms 
+                if (userViewModel.Role == "customer")
+                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
+                else
+                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
             }
             return View(userViewModel);
         }
+        
+
+
 
         /*
 
