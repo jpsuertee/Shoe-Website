@@ -38,7 +38,6 @@ namespace databseApp.Controllers
                 MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
                 daProducts.Fill(dtbl);
                 
-           
             }
             return View(dtbl);
         }

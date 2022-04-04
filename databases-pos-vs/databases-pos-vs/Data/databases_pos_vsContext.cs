@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using databseApp.Models;
+using databaseApp.Models;
 
 namespace databases_pos_vs.Data
 {
@@ -15,5 +16,8 @@ namespace databases_pos_vs.Data
         }
 
         public DbSet<databseApp.Models.ProductViewModel> ProductViewModel { get; set; }
+
+        public DbSet<databaseApp.Models.VendorViewModel> VendorViewModel { get; set; }
+
     }
 }
