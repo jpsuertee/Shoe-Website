@@ -12,6 +12,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using MySql.Data.MySqlClient;
 
+
 namespace databseApp.Controllers
 {
     public class UserController : Controller
@@ -22,20 +23,79 @@ namespace databseApp.Controllers
         {
             this._configuration = configuration;
         }
-        //private readonly databseAppContext _context;
+
 
         public bool logged_in = false;
-        //NOTE: this variable will be used to determined if logged in or not
+        public UserViewModel account;
 
 
+        public string getAccount()
+        {
+            if (logged_in)
+                return account.FirstName_;
+            else
+                return "Login";
+        }
 
         // GET: User
         public IActionResult UserIndex()
         {
-            return View();
-            //function to go to account settings/reports
+
+            //if (!logged_in)
+            //{
+                UserViewModel userViewModel = new UserViewModel();
+                return View(userViewModel);
+            /*}
+            
+            else
+            {
+                return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
+            }*/        
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UserIndex([Bind("FirstName_, LastName_, Email, Password, Role, UserID")] UserViewModel userViewModel)
+        {
+            DataTable dtbl = new DataTable();
+            DataTable dtbl2 = new DataTable();
+            MySqlDataAdapter daUsers;
+            MySqlDataAdapter daName;
+
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                string sql = "SELECT * FROM Users WHERE email = '"+userViewModel.Email+"' AND password = '"+userViewModel.Password+"'";
+                daUsers = new MySqlDataAdapter(sql, sqlConnection);
+                daUsers.Fill(dtbl);
+
+                if (dtbl.Rows.Count == 1)
+                {
+                    logged_in = true;
+                    userViewModel.UserID = Convert.ToInt32(dtbl.Rows[0]["user_id"].ToString());
+                    userViewModel.Role = dtbl.Rows[0]["role"].ToString(); 
+                    if (userViewModel.Role == "customer")
+                    {
+                        string temp = "SELECT FirstName FROM Customers WHERE CustomerID = '"+userViewModel.UserID+"'";
+                        daName = new MySqlDataAdapter(temp, sqlConnection);
+                        daName.Fill(dtbl2);
+                        userViewModel.FirstName_ = dtbl2.Rows[0]["FirstName"].ToString();
+                    } 
+                    else
+                    {
+                        string temp = "SELECT FirstName FROM Employees WHERE employee_id = '"+userViewModel.UserID+"'";
+                        daName = new MySqlDataAdapter(temp, sqlConnection);
+                        daName.Fill(dtbl2);
+                        userViewModel.FirstName_ = dtbl2.Rows[0]["FirstName"].ToString();
+                    }
+                    sqlConnection.Close();
+                    account = userViewModel;
+                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
+                }
+                sqlConnection.Close();
+            }
+            return View(userViewModel);
+        }
 
         // GET:
         public IActionResult Create()
@@ -47,7 +107,7 @@ namespace databseApp.Controllers
         // POST: User/Create/?
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role")] UserViewModel userViewModel)
+        public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role, UserID")] UserViewModel userViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -64,137 +124,14 @@ namespace databseApp.Controllers
 
                     sqlCmd.ExecuteNonQuery();
                 }
-                return RedirectToAction(nameof(Index)); //redirects to either Customer or Employee forms 
+                if (userViewModel.Role == "customer")
+                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
+                else
+                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });   
             }
             return View(userViewModel);
         }
 
-        /*
 
-        // GET: User/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userViewModel = await _context.UserViewModel
-                .FirstOrDefaultAsync(m => m.UserID == id);
-            if (userViewModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(userViewModel);
-        }
-
-        // GET: User/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: User/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserID,password")] UserViewModel userViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(userViewModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(userViewModel);
-        }
-
-        // GET: User/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userViewModel = await _context.UserViewModel.FindAsync(id);
-            if (userViewModel == null)
-            {
-                return NotFound();
-            }
-            return View(userViewModel);
-        }
-        
-        // POST: User/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserID,password")] UserViewModel userViewModel)
-        {
-            if (id != userViewModel.UserID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(userViewModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserViewModelExists(userViewModel.UserID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(userViewModel);
-        }
-        
-        // GET: User/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userViewModel = await _context.UserViewModel
-                .FirstOrDefaultAsync(m => m.UserID == id);
-            if (userViewModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(userViewModel);
-        }
-
-        // POST: User/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var userViewModel = await _context.UserViewModel.FindAsync(id);
-            _context.UserViewModel.Remove(userViewModel);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        
-        private bool UserViewModelExists(int id)
-        {
-            return _context.UserViewModel.Any(e => e.UserID == id);
-        }
-        */
     }
 }
