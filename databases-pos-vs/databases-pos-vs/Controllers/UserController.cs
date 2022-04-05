@@ -18,7 +18,6 @@ namespace databseApp.Controllers
     public class UserController : Controller
     {
         private readonly IConfiguration _configuration;
-
         public UserController(IConfiguration configuration)
         {
             this._configuration = configuration;
@@ -29,6 +28,7 @@ namespace databseApp.Controllers
         public UserViewModel account;
 
 
+
         public string getAccount()
         {
             if (logged_in)
@@ -37,9 +37,10 @@ namespace databseApp.Controllers
                 return "Login";
         }
 
-        // GET: User
+        // GET: User Login
         public IActionResult UserIndex()
         {
+
 
             //if (!logged_in)
             //{
@@ -98,13 +99,12 @@ namespace databseApp.Controllers
         }
 
         // GET:
+
         public IActionResult Create()
         {
             UserViewModel userViewModel = new UserViewModel();
             return View(userViewModel);
         }
-
-        // POST: User/Create/?
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role, UserID")] UserViewModel userViewModel)
@@ -124,10 +124,12 @@ namespace databseApp.Controllers
 
                     sqlCmd.ExecuteNonQuery();
                 }
+
                 if (userViewModel.Role == "customer")
                     return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
                 else
                     return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });   
+
             }
             return View(userViewModel);
         }
