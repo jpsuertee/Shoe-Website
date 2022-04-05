@@ -50,27 +50,39 @@ namespace databseApp.Controllers
             return View(productViewModel);
         }
 
-        //// GET: Product/Create
-        //public IActionResult Create()
-        //{
-        //    return View();
-        //}
+        // GET: Product/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
 
-        //// POST: Product/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(productViewModel);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View(productViewModel);
-        //}
+        // POST: Product/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+                {
+                    sqlConnection.Open();
+                    MySqlCommand sqlCmd = new MySqlCommand("ProductsAddOrEdit", sqlConnection);
+                    sqlCmd.CommandType = CommandType.StoredProcedure;
+                    sqlCmd.Parameters.AddWithValue("@Product_id", productViewModel.ProductId);
+                    sqlCmd.Parameters.AddWithValue("@Size", productViewModel.Size);
+                    sqlCmd.Parameters.AddWithValue("@Price", productViewModel.Price);
+                    sqlCmd.Parameters.AddWithValue("@Name", productViewModel.Name);
+                    sqlCmd.Parameters.AddWithValue("@Category_id", productViewModel.Category_id);
+                    sqlCmd.Parameters.AddWithValue("@Vendor_id", productViewModel.Vendor_id);
+
+                    sqlCmd.ExecuteNonQuery();
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(productViewModel);
+        }
 
         // GET: Product/Edit/
         public IActionResult Edit(int id)
@@ -136,9 +148,9 @@ namespace databseApp.Controllers
                 {
                     productViewModel.ProductId = Convert.ToInt32(dtbl.Rows[0]["product_id"].ToString());
                     productViewModel.Size = dtbl.Rows[0]["size"].ToString();
+
+                    productViewModel.Price = (float)Convert.ToDouble(dtbl.Rows[0]["price"].ToString()); //Cant convert this for some reason 
                     
-                    //productViewModel.Price = Convert.ToFl(dtbl.Rows[0]["price"].ToString()); //Cant convert this for some reason 
-                    productViewModel.Price = 3;
                     productViewModel.Name = dtbl.Rows[0]["name"].ToString();
                     productViewModel.times_sold = Convert.ToInt32(dtbl.Rows[0]["times_sold"].ToString());
 
