@@ -44,7 +44,7 @@ namespace databseApp.Controllers
 
 
         //GET: Product/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(int id)
         {
             ProductViewModel productViewModel = FetchProductByID(id);
             return View(productViewModel);
@@ -73,9 +73,11 @@ namespace databseApp.Controllers
         //}
 
         // GET: Product/Edit/
-        public IActionResult Edit(string id)
+        public IActionResult Edit(int id)
         {
             ProductViewModel productViewModel = new ProductViewModel();
+            if (id > 0)
+                productViewModel = FetchProductByID(id);
             return View(productViewModel);
         }
 
@@ -84,7 +86,7 @@ namespace databseApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(string id, [Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
+        public IActionResult Edit(int id, [Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
         {
 
 
@@ -114,7 +116,7 @@ namespace databseApp.Controllers
  
 
 
-        public ProductViewModel FetchProductByID(string? id)
+        public ProductViewModel FetchProductByID(int? id)
         {
 
             ProductViewModel productViewModel = new ProductViewModel();
@@ -147,7 +149,7 @@ namespace databseApp.Controllers
         }
 
         // GET: Product/Delete/5
-        public IActionResult Delete(string id)
+        public IActionResult Delete(int id)
         {
             ProductViewModel productViewModel = FetchProductByID(id);
             return View(productViewModel);
@@ -156,7 +158,7 @@ namespace databseApp.Controllers
         // POST: Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(string id)
+        public IActionResult DeleteConfirmed(int id)
         {
             using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
             {
