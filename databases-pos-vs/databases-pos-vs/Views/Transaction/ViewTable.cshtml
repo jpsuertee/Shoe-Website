@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewData["Title"] = "Report Results";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Date
+            </th>
+            <th>
+                Total Cost
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Rows.Count; i++)
+        {
+            <tr>
+                <td>
+                    @Model.Rows[i]["Transaction_id"]
+                </td>
+                <td>
+                    @Model.Rows[i]["Order_Date"]
+                </td>
+                <td>
+                    @Model.Rows[i]["Total_Cost"]
+                </td>
+
+                <td>
+                    <a asp-action="Details" asp-route-id="@Model.Rows[i]["Transaction_id"]">Details</a> |
+
+                </td>
+            </tr>
+}
+    </tbody>
+</table>

@@ -1,3 +1,4 @@
+@model databseApp.Models.UserViewModel
 @{
     ViewData["Title"] = "Login";
 }
@@ -5,11 +6,25 @@
 
 <div class="text-center">
 	<h1>@ViewData["Title"]</h1>
-	<p><input type="email" placeholder="Email"></p>
-	<p><input type="password" placeholder="Password"></p>
-	<p><input type="submit" value="Login"></p>
-	<div class="create-account">
-		<a asp-area="" asp-controller="User" asp-action="Create">Create account</a>
-	</div>
+	<form asp-action="UserIndex">
+
+		<label asp-for="Email">Email</label>
+		<input asp-for="Email" type="email" name="Email" placeholder="yourname@email.com" required>
+
+		<label asp-for="Password">Password</label>
+		<input asp-for="Password" type="password" name="Password" placeholder="password" required>
+
+		<p><input type="submit" value="Login"></p>
+
+		<div class="create-account">
+			<a asp-area="" asp-controller="User" asp-action="Create">Create account</a>
+		</div>
+
+	</form>
 </div>
- 
+
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
