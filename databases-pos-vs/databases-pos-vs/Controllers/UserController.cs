@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using MySql.Data.MySqlClient;
+using System.Web;
 
 
 namespace databseApp.Controllers
@@ -35,6 +36,15 @@ namespace databseApp.Controllers
                 return account.FirstName_;
             else
                 return "Login";
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Response.Cookies.Delete("role");
+            HttpContext.Response.Cookies.Delete("email");
+
+
+            return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
         }
 
         // GET: User Login
@@ -91,6 +101,15 @@ namespace databseApp.Controllers
                     }
                     sqlConnection.Close();
                     account = userViewModel;
+
+                    //save account in localstorage as cookie
+                    HttpContext.Response.Cookies.Append("email", account.Email);
+                    HttpContext.Response.Cookies.Append("role", account.Role);
+
+
+
+
+
                     return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
                 }
                 sqlConnection.Close();
