@@ -1,26 +1,45 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using databases_pos_vs.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using databseApp.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace databases_pos_vs.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IConfiguration _configuration;
+
+        public HomeController(IConfiguration configuration)
         {
-            _logger = logger;
+            this._configuration = configuration;
+
         }
 
         public IActionResult Index()
         {
-            return View();
+            MySqlDataAdapter daProducts;
+            DataTable dtbl = new DataTable();
+
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                string sql = "SELECT * FROM Products";
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+
+            }
+            return View(dtbl);
+           
         }
 
         public IActionResult Privacy()
@@ -28,10 +47,10 @@ namespace databases_pos_vs.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Cart()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
+
     }
 }
