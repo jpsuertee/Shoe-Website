@@ -13,36 +13,23 @@ using System.Data;
 using MySql.Data.MySqlClient;
 using System.Web;
 
-
 namespace databseApp.Controllers
 {
     public class UserController : Controller
     {
         private readonly IConfiguration _configuration;
+
         public UserController(IConfiguration configuration)
         {
             this._configuration = configuration;
-        }
-
-
-        public bool logged_in = false;
-        public UserViewModel account;
-
-
-
-        public string getAccount()
-        {
-            if (logged_in)
-                return account.FirstName_;
-            else
-                return "Login";
         }
 
         public IActionResult Logout()
         {
             HttpContext.Response.Cookies.Delete("role");
             HttpContext.Response.Cookies.Delete("email");
-
+            HttpContext.Response.Cookies.Delete("name");
+            HttpContext.Response.Cookies.Delete("id");
 
             return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
         }
@@ -50,18 +37,8 @@ namespace databseApp.Controllers
         // GET: User Login
         public IActionResult UserIndex()
         {
-
-
-            //if (!logged_in)
-            //{
                 UserViewModel userViewModel = new UserViewModel();
-                return View(userViewModel);
-            /*}
-            
-            else
-            {
-                return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
-            }*/        
+                return View(userViewModel); 
         }
 
         [HttpPost]
@@ -82,7 +59,6 @@ namespace databseApp.Controllers
 
                 if (dtbl.Rows.Count == 1)
                 {
-                    logged_in = true;
                     userViewModel.UserID = Convert.ToInt32(dtbl.Rows[0]["user_id"].ToString());
                     userViewModel.Role = dtbl.Rows[0]["role"].ToString(); 
                     if (userViewModel.Role == "customer")
@@ -100,15 +76,11 @@ namespace databseApp.Controllers
                         userViewModel.FirstName_ = dtbl2.Rows[0]["FirstName"].ToString();
                     }
                     sqlConnection.Close();
-                    account = userViewModel;
-
                     //save account in localstorage as cookie
-                    HttpContext.Response.Cookies.Append("email", account.Email);
-                    HttpContext.Response.Cookies.Append("role", account.Role);
-
-
-
-
+                    HttpContext.Response.Cookies.Append("id", (userViewModel.UserID).ToString());
+                    HttpContext.Response.Cookies.Append("email", userViewModel.Email);
+                    HttpContext.Response.Cookies.Append("role", userViewModel.Role);
+                    HttpContext.Response.Cookies.Append("name", userViewModel.FirstName_);
 
                     return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
                 }
@@ -118,7 +90,6 @@ namespace databseApp.Controllers
         }
 
         // GET:
-
         public IActionResult Create()
         {
             UserViewModel userViewModel = new UserViewModel();
@@ -126,8 +97,10 @@ namespace databseApp.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role, UserID")] UserViewModel userViewModel)
+        public IActionResult Create([Bind("FirstName_, LastName_, Email, Password, Role, UserID, Address, Zipcode, City, State")] UserViewModel userViewModel)
         {
+            MySqlDataAdapter daProducts;
+            DataTable dtbl = new DataTable();
             if (ModelState.IsValid)
             {
                 using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
@@ -136,23 +109,85 @@ namespace databseApp.Controllers
                     MySqlCommand sqlCmd = new MySqlCommand("CreateNewUser", sqlConnection);
                     sqlCmd.CommandType = CommandType.StoredProcedure;
                     sqlCmd.Parameters.AddWithValue("@FirstName_", userViewModel.FirstName_);
-                    sqlCmd.Parameters.AddWithValue("@LastName_", userViewModel.FirstName_);
+                    sqlCmd.Parameters.AddWithValue("@LastName_", userViewModel.LastName_);
                     sqlCmd.Parameters.AddWithValue("@Email", userViewModel.Email);
                     sqlCmd.Parameters.AddWithValue("@Password", userViewModel.Password);
                     sqlCmd.Parameters.AddWithValue("@Role", userViewModel.Role);
-
+                    sqlCmd.Parameters.AddWithValue("@Address_", userViewModel.Address);
+                    sqlCmd.Parameters.AddWithValue("@Zipcode_", userViewModel.Zipcode);
+                    sqlCmd.Parameters.AddWithValue("@City_", userViewModel.City);
+                    sqlCmd.Parameters.AddWithValue("@State_", userViewModel.State);
                     sqlCmd.ExecuteNonQuery();
-                }
 
-                if (userViewModel.Role == "customer")
-                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
-                else
-                    return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });   
+                    
+                    string sql = "SELECT user_id FROM Users WHERE email = '"+userViewModel.Email+"' AND password = '"+userViewModel.Password+"'";                    
+                    daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                    MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                    daProducts.Fill(dtbl);
+                    userViewModel.UserID = Convert.ToInt32(dtbl.Rows[0]["user_id"].ToString());
+                }
+                HttpContext.Response.Cookies.Append("id", (userViewModel.UserID).ToString());
+                HttpContext.Response.Cookies.Append("email", userViewModel.Email);
+                HttpContext.Response.Cookies.Append("role", userViewModel.Role);
+                HttpContext.Response.Cookies.Append("firstname", userViewModel.FirstName_);
+
+                return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });   
 
             }
             return View(userViewModel);
         }
 
 
+        public async Task<IActionResult> Details()
+        {
+            UserViewModel userViewModel = FetchUserByID();
+             return View(userViewModel);
+        }
+        public UserViewModel FetchUserByID()
+        {
+            UserViewModel userViewModel = new UserViewModel();
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                MySqlDataAdapter daProducts;
+                DataTable dtbl = new DataTable();
+                int userid = Int32.Parse(Request.Cookies["id"]);
+                string userrole = Request.Cookies["role"];
+                string sql;
+
+                sqlConnection.Open();
+                if (userrole == "customer")
+                    sql = string.Format("SELECT * FROM Users, Customers WHERE Users.user_id = '"+userid+"' AND Customers.CustomerID = '"+userid+"'");
+                else
+                    sql = string.Format("SELECT * FROM Users, Employees WHERE Users.user_id = '"+userid+"' AND Employees.employee_id = '"+userid+"'");
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+                if (dtbl.Rows.Count == 1 && userrole == "customer")
+                {
+                    userViewModel.UserID = userid;
+                    userViewModel.Role = userrole; 
+                    userViewModel.Password = dtbl.Rows[0]["password"].ToString();
+                    userViewModel.FirstName_ = dtbl.Rows[0]["FirstName"].ToString(); 
+                    userViewModel.LastName_ = dtbl.Rows[0]["LastName"].ToString(); 
+                    userViewModel.Email = dtbl.Rows[0]["email"].ToString(); 
+                    userViewModel.Address = dtbl.Rows[0]["Address"].ToString(); 
+                    userViewModel.City = dtbl.Rows[0]["City"].ToString(); 
+                    userViewModel.State = dtbl.Rows[0]["State"].ToString(); 
+                    userViewModel.Zipcode = dtbl.Rows[0]["Zipcode"].ToString(); 
+
+                }
+                else if (dtbl.Rows.Count == 1 && userrole == "employee")
+                {
+                    userViewModel.UserID = userid;
+                    userViewModel.Role = userrole; 
+                    userViewModel.Password = dtbl.Rows[0]["password"].ToString();
+                    userViewModel.Email = dtbl.Rows[0]["email"].ToString(); 
+                    userViewModel.FirstName_ = dtbl.Rows[0]["FirstName"].ToString(); 
+                    userViewModel.LastName_ = dtbl.Rows[0]["LastName"].ToString(); 
+                    userViewModel.Date = ((DateTime)dtbl.Rows[0]["DateJoined"]).ToString("dd-MM-yyyy");
+                }
+                return userViewModel;
+            }
+        }
     }
 }
