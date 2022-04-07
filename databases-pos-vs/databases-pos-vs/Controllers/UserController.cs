@@ -89,6 +89,7 @@ namespace databseApp.Controllers
             return View(userViewModel);
         }
 
+
         // GET:
         public IActionResult Create()
         {
@@ -143,6 +144,62 @@ namespace databseApp.Controllers
             UserViewModel userViewModel = FetchUserByID();
              return View(userViewModel);
         }
+
+        public IActionResult Edit(int id)
+        {
+            UserViewModel userViewModel = FetchUserByID();
+            return View(userViewModel);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit([Bind("UserID, Password, FirstName_, LastName_, Email, Address, Zipcode, City, State, Date")] UserViewModel userViewModel)
+        {
+
+            //function to check if email exists in order to avoid repetition!!!!!!!
+            if (ModelState.IsValid)
+            {
+                using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+                {
+                    
+                    sqlConnection.Open();
+                     MySqlCommand sqlCmd;
+
+                    if (Request.Cookies["role"] == "customers")
+                    {
+                        sqlCmd = new MySqlCommand("EditCustomer", sqlConnection);
+                        sqlCmd.CommandType = CommandType.StoredProcedure;
+                        sqlCmd.Parameters.AddWithValue("@id", userViewModel.UserID);
+                        sqlCmd.Parameters.AddWithValue("@FirstName_", userViewModel.FirstName_);
+                        sqlCmd.Parameters.AddWithValue("@LastName_", userViewModel.LastName_);
+                        sqlCmd.Parameters.AddWithValue("@Email_", userViewModel.Email);
+                        sqlCmd.Parameters.AddWithValue("@Password_", userViewModel.Password);
+                        sqlCmd.Parameters.AddWithValue("@Role", userViewModel.Role);
+                        sqlCmd.Parameters.AddWithValue("@Address_", userViewModel.Address);
+                        sqlCmd.Parameters.AddWithValue("@Zipcode_", userViewModel.Zipcode);
+                        sqlCmd.Parameters.AddWithValue("@City_", userViewModel.City);
+                        sqlCmd.Parameters.AddWithValue("@State_", userViewModel.State);
+                                            sqlCmd.ExecuteNonQuery();
+                    sqlConnection.Close();
+                    }
+                    else
+                    {
+                        sqlCmd = new MySqlCommand("EditEmployee", sqlConnection);
+                        sqlCmd.CommandType = CommandType.StoredProcedure;
+                        sqlCmd.Parameters.AddWithValue("@id", userViewModel.UserID);
+                        sqlCmd.Parameters.AddWithValue("@FirstName_", userViewModel.FirstName_);
+                        sqlCmd.Parameters.AddWithValue("@LastName_", userViewModel.LastName_);
+                        sqlCmd.Parameters.AddWithValue("@Email_", userViewModel.Email);
+                        sqlCmd.Parameters.AddWithValue("@Password_", userViewModel.Password);
+                                            sqlCmd.ExecuteNonQuery();
+                    sqlConnection.Close();
+                    }
+
+                }
+                return RedirectToAction("Details");
+            }
+            return RedirectToAction("Details");
+        }
+
         public UserViewModel FetchUserByID()
         {
             UserViewModel userViewModel = new UserViewModel();
@@ -184,7 +241,7 @@ namespace databseApp.Controllers
                     userViewModel.Email = dtbl.Rows[0]["email"].ToString(); 
                     userViewModel.FirstName_ = dtbl.Rows[0]["FirstName"].ToString(); 
                     userViewModel.LastName_ = dtbl.Rows[0]["LastName"].ToString(); 
-                    userViewModel.Date = ((DateTime)dtbl.Rows[0]["DateJoined"]).ToString("dd-MM-yyyy");
+                    userViewModel.Date = (dtbl.Rows[0]["DateJoined"]).ToString();
                 }
                 return userViewModel;
             }
