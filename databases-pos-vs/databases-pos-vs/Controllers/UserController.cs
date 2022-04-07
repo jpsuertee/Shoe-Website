@@ -138,6 +138,14 @@ namespace databseApp.Controllers
         }
 
 
+        // GET: /User/TransactionHistoryReport (Work on later)
+        public IActionResult TransactionHistoryReport()
+        {
+            UserViewModel userViewModel = new UserViewModel();
+            return View(userViewModel);
+        }
+
+
         public async Task<IActionResult> Details()
         {
             UserViewModel userViewModel = FetchUserByID();

@@ -61,7 +61,7 @@ namespace databseApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
+        public IActionResult Create([Bind("ProductId,Size,Price,Name,Image_url")] ProductViewModel productViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -74,6 +74,7 @@ namespace databseApp.Controllers
                     sqlCmd.Parameters.AddWithValue("@Size", productViewModel.Size);
                     sqlCmd.Parameters.AddWithValue("@Price", productViewModel.Price);
                     sqlCmd.Parameters.AddWithValue("@Name", productViewModel.Name);
+                    sqlCmd.Parameters.AddWithValue("@Image_url", productViewModel.Image_url);
                     sqlCmd.Parameters.AddWithValue("@Category_id", productViewModel.Category_id);
                     sqlCmd.Parameters.AddWithValue("@Vendor_id", productViewModel.Vendor_id);
 
@@ -98,7 +99,7 @@ namespace databseApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("ProductId,Size,Price,Name")] ProductViewModel productViewModel)
+        public IActionResult Edit(int id, [Bind("ProductId,Size,Price,Name,Image_url")] ProductViewModel productViewModel)
         {
 
 
@@ -115,6 +116,8 @@ namespace databseApp.Controllers
                     sqlCmd.Parameters.AddWithValue("@Name", productViewModel.Name);
                     sqlCmd.Parameters.AddWithValue("@Category_id", productViewModel.Category_id);
                     sqlCmd.Parameters.AddWithValue("@Vendor_id", productViewModel.Vendor_id);
+                    sqlCmd.Parameters.AddWithValue("@Image_url", productViewModel.Image_url);
+
 
                     sqlCmd.ExecuteNonQuery();
                 }
