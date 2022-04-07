@@ -17,5 +17,6 @@ namespace databseApp.Models
         public string Zipcode { get; set; }
         public string City { get; set; }
         public string State { get; set; }
+        public string Date { get; set; }
     }
 }
