@@ -85,6 +85,8 @@
 </div>
 <div>
 	<a asp-action="Edit" asp-route-id="@Model.UserID">Edit</a>
+	<br />
+	<a asp-controller="Customer" asp-action="Data" asp-route-id="@Model.UserID">Generate Report</a>
 </div>
 @section Scripts {
 	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
