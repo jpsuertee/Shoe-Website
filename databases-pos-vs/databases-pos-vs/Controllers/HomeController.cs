@@ -86,5 +86,24 @@ namespace databases_pos_vs.Controllers
    
         }
 
+        public IActionResult Checkout()
+        {
+            return View();
+        }
+        //checkout controller
+        //1. SQL query for creating new Transaction_Info entry
+        //2. For every product in checkout, create new transactions entry with Transaction_Info Id and corresponding Product_id
+
+
+        //TODO:
+        //Jason: checkout form
+        //Chichen: grab last insert id into a variable
+        //Liam: grab product ids and make Transaction_info query
+
+        [HttpPost]
+        public IActionResult Checkout([Bind("")] TransactionViewModel transactionViewModel)
+        {
+
+        }
     }
 }

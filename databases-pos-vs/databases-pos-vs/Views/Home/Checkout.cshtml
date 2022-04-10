@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Checkout   ";
+}
+
+<div class="jumbotron">
+    <h1>@ViewData["Title"]</h1>
+</div>
+
+
+<table class="table table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>
+                Size
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Name
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Rows.Count; i++)
+        {
+        <tr>
+            <td>
+                @Model.Rows[i]["Size"]
+            </td>
+            <td>
+                @Model.Rows[i]["Price"]
+
+            </td>
+            <td>
+                @Model.Rows[i]["Name"]
+
+            </td>
+            <td>
+                <a asp-action="Delete" asp-route-id="@Model.Rows[i]["product_id"]">Delete</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
