@@ -103,7 +103,24 @@ namespace databases_pos_vs.Controllers
         [HttpPost]
         public IActionResult Checkout([Bind("")] TransactionViewModel transactionViewModel)
         {
+            // select the most recent trx_id from trx_info table into a variable
+            if (ModelState.IsValid)
+            {
+                using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+                {
+                    sqlConnection.Open();
+                    MySqlCommand sqlCmd = new MySqlCommand("Select_most_recent_trxInfo", sqlConnection);
+                    sqlCmd.CommandType = CommandType.StoredProcedure;
 
+                    sqlCmd.Parameters.Add("@trxInfoId", MySqlDbType.Int32);
+                    sqlCmd.Parameters["@trxInfoId"].Direction = ParameterDirection.Output;
+
+                    sqlCmd.ExecuteNonQuery();
+                    System.Diagnostics.Debug.WriteLine("Tranx number: " + sqlCmd.Parameters["@trxInfoId"].Value);
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View();
         }
     }
 }
