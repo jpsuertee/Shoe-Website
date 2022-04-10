@@ -47,7 +47,7 @@ namespace databases_pos_vs.Controllers
             return View();
         }
 
-        public IActionResult AddToCart(int id)
+        public IActionResult AddToCart(int id, float Price)
         {
             string idString = id.ToString();
 
@@ -59,6 +59,27 @@ namespace databases_pos_vs.Controllers
                 string newCart = HttpContext.Request.Cookies["CartCookie"] + "," + idString;
                 HttpContext.Response.Cookies.Append("CartCookie", newCart);
             }
+
+            if (HttpContext.Request.Cookies.ContainsKey("Sum"))
+            {
+                float newSum = float.Parse(HttpContext.Request.Cookies["Sum"]) + Price;
+                HttpContext.Response.Cookies.Append("Sum", newSum.ToString());
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("Sum", Price.ToString());
+            }
+
+            if (HttpContext.Request.Cookies.ContainsKey("Qty"))
+            {
+                float newSum = Int32.Parse(HttpContext.Request.Cookies["Qty"]) + 1;
+                HttpContext.Response.Cookies.Append("Qty", newSum.ToString());
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("Qty", "1");
+            }
+
 
 
 
@@ -105,24 +126,50 @@ namespace databases_pos_vs.Controllers
 
         
         [HttpPost]
-        public IActionResult Checkout([Bind("")] TransactionViewModel transactionViewModel)
+        public IActionResult Checkout([Bind("Customer_id, Paymnet_Method, Order_date, Shipping_Address")] TransactionViewModel transactionViewModel)
         {
-            // select the most recent trx_id from trx_info table into a variable
-            if (ModelState.IsValid)
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
             {
-                using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+
+                sqlConnection.Open();
+
+ 
+
+                //
+
+                string userId = HttpContext.Request.Cookies["id"];
+                string productCost = HttpContext.Request.Cookies["Sum"];
+                //string query = "INSERT INTO Transaction_Info(customer_id, payment_method, order_date, shipping_address, product_cost, shipping_cost, total_cost)";
+                string query = String.Format("INSERT INTO Transaction_Info({0}, {1}, {2}, {3},)", userId);
+
+                MySqlCommand cmd = new MySqlCommand(query, sqlConnection);
+
+                MySqlCommand sqlCmd = new MySqlCommand("Select_most_recent_trxInfo", sqlConnection);
+                sqlCmd.CommandType = CommandType.StoredProcedure;
+
+                sqlCmd.Parameters.Add("@trxInfoId", MySqlDbType.Int32);
+                sqlCmd.Parameters["@trxInfoId"].Direction = ParameterDirection.Output;
+
+                sqlCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Tranx number: " + sqlCmd.Parameters["@trxInfoId"].Value);
+
+                int transactionInfoId = Int32.Parse(sqlCmd.Parameters["@trxInfoId"].Value.ToString());
+               
+                string productIdsString = HttpContext.Request.Cookies["CartCookie"];
+
+                string[] productIds = productIdsString.Split(",");
+
+                foreach (var id in productIds)
                 {
-                    sqlConnection.Open();
-                    MySqlCommand sqlCmd = new MySqlCommand("Select_most_recent_trxInfo", sqlConnection);
-                    sqlCmd.CommandType = CommandType.StoredProcedure;
-        public IActionResult Checkout([Bind("Shipping_Address, Payment_Method")] TransactionViewModel transactionViewModel)
-        {
+                    //INSERT INTO Transactions(FK_transactioninfoID, productId, quantity) VALUES(transactionInfoId, Quantity);
+                    string transQuery = String.Format("INSERT INTO Transactions({0}, {1}, {2} )");
+                }
 
 
-            return View();
+
+            }
+            return RedirectToAction(nameof(Index));
         }
-
-
 
     }
 }
