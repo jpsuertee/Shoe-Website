@@ -69,7 +69,17 @@ namespace databases_pos_vs.Controllers
             {
                 HttpContext.Response.Cookies.Append("Sum", Price.ToString());
             }
-        
+
+            if (HttpContext.Request.Cookies.ContainsKey("Qty"))
+            {
+                float newSum = Int32.Parse(HttpContext.Request.Cookies["Qty"]) + 1;
+                HttpContext.Response.Cookies.Append("Qty", newSum.ToString());
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("Qty", "1");
+            }
+
 
 
 
@@ -118,12 +128,41 @@ namespace databases_pos_vs.Controllers
             using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
             {
                 sqlConnection.Open();
+
+ 
+
+                //
+
                 string userId = HttpContext.Request.Cookies["id"];
+                string productCost = HttpContext.Request.Cookies["Sum"];
                 //string query = "INSERT INTO Transaction_Info(customer_id, payment_method, order_date, shipping_address, product_cost, shipping_cost, total_cost)";
                 string query = String.Format("INSERT INTO Transaction_Info({0}, {1}, {2}, {3},)", userId);
 
                 MySqlCommand cmd = new MySqlCommand(query, sqlConnection);
-                //get LAST_INSERT_ID();
+
+                MySqlCommand sqlCmd = new MySqlCommand("Select_most_recent_trxInfo", sqlConnection);
+                sqlCmd.CommandType = CommandType.StoredProcedure;
+
+                sqlCmd.Parameters.Add("@trxInfoId", MySqlDbType.Int32);
+                sqlCmd.Parameters["@trxInfoId"].Direction = ParameterDirection.Output;
+
+                sqlCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Tranx number: " + sqlCmd.Parameters["@trxInfoId"].Value);
+
+                int transactionInfoId = Int32.Parse(sqlCmd.Parameters["@trxInfoId"].Value.ToString());
+               
+                string productIdsString = HttpContext.Request.Cookies["CartCookie"];
+
+                string[] productIds = productIdsString.Split(",");
+
+                foreach (var id in productIds)
+                {
+                    //INSERT INTO Transactions(FK_transactioninfoID, productId, quantity) VALUES(transactionInfoId, Quantity);
+                    string transQuery = String.Format("INSERT INTO Transactions({0}, {1}, {2} )");
+                }
+
+
+
             }
             return RedirectToAction(nameof(Index));
         }
