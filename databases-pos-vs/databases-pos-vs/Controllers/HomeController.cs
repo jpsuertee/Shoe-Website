@@ -47,7 +47,7 @@ namespace databases_pos_vs.Controllers
             return View();
         }
 
-        public IActionResult AddToCart(int id)
+        public IActionResult AddToCart(int id, float Price)
         {
             string idString = id.ToString();
 
@@ -59,6 +59,17 @@ namespace databases_pos_vs.Controllers
                 string newCart = HttpContext.Request.Cookies["CartCookie"] + "," + idString;
                 HttpContext.Response.Cookies.Append("CartCookie", newCart);
             }
+
+            if (HttpContext.Request.Cookies.ContainsKey("Sum"))
+            {
+                float newSum = float.Parse(HttpContext.Request.Cookies["Sum"]) + Price;
+                HttpContext.Response.Cookies.Append("Sum", newSum.ToString());
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("Sum", Price.ToString());
+            }
+        
 
 
 
@@ -100,10 +111,22 @@ namespace databases_pos_vs.Controllers
         //Chichen: grab last insert id into a variable
         //Liam: grab product ids and make Transaction_info query
 
+        
         [HttpPost]
-        public IActionResult Checkout([Bind("")] TransactionViewModel transactionViewModel)
+        public IActionResult Checkout([Bind("Customer_id, Paymnet_Method, Order_date, Shipping_Address")] TransactionViewModel transactionViewModel)
         {
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                sqlConnection.Open();
+                string userId = HttpContext.Request.Cookies["id"];
+                //string query = "INSERT INTO Transaction_Info(customer_id, payment_method, order_date, shipping_address, product_cost, shipping_cost, total_cost)";
+                string query = String.Format("INSERT INTO Transaction_Info({0}, {1}, {2}, {3},)", userId);
 
+                MySqlCommand cmd = new MySqlCommand(query, sqlConnection);
+                //get LAST_INSERT_ID();
+            }
+            return RedirectToAction(nameof(Index));
         }
+        
     }
 }
