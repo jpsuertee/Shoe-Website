@@ -1,0 +1,36 @@
+@model databseApp.Models.UserViewModel
+@{
+    ViewData["Title"] = "CreateCustomer";
+}
+
+<h1> helloooooooooo </h1>
+
+<section class="loginform cf">
+	<form asp-action="Create">
+		<ul>
+			<li>
+				<label asp-for="Address">Address</label>
+				<input asp-for="Address" type="text" name="Address" required>
+			</li>
+			<li>
+				<label asp-for="City">City</label>
+				<input asp-for="City" type="text" name="City" required>
+			</li>
+			<li>
+				<label asp-for="State">State</label>
+				<input asp-for="State" type="text" name="State" required>
+			</li>
+			<li>
+				<label asp-for="Zipcode">Zipcode</label>
+				<input asp-for="Zipcode" type="text" name="Zipcode" required>
+			</li>
+
+		</ul>
+		<input type="submit" value="Next">
+	</form>
+</section>
+
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

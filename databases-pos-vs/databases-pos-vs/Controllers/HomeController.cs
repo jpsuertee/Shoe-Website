@@ -89,7 +89,7 @@ namespace databases_pos_vs.Controllers
 
         public IActionResult Cart()
         {
-
+            /*
             MySqlDataAdapter daProducts;
             DataTable dtbl = new DataTable();
 
@@ -101,14 +101,16 @@ namespace databases_pos_vs.Controllers
                 daProducts = new MySqlDataAdapter(sql, sqlConnection);
                 MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
                 daProducts.Fill(dtbl);
-
-            }
-            return View(dtbl);
-   
+            
+            }*/
+            return View();
+               
         }
+
 
         public IActionResult Checkout()
         {
+            //UserViewModel userViewModel = FetchUserByID();    ADD LATER
             return View();
         }
         //checkout controller
@@ -121,12 +123,14 @@ namespace databases_pos_vs.Controllers
         //Chichen: grab last insert id into a variable
         //Liam: grab product ids and make Transaction_info query
 
+
         
         [HttpPost]
         public IActionResult Checkout([Bind("Customer_id, Paymnet_Method, Order_date, Shipping_Address")] TransactionViewModel transactionViewModel)
         {
             using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
             {
+
                 sqlConnection.Open();
 
  
@@ -166,6 +170,6 @@ namespace databases_pos_vs.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        
+
     }
 }
