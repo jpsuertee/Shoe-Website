@@ -120,7 +120,6 @@ namespace databseApp.Controllers
                     sqlCmd.Parameters.AddWithValue("@State_", userViewModel.State);
                     sqlCmd.ExecuteNonQuery();
 
-                    
                     string sql = "SELECT user_id FROM Users WHERE email = '"+userViewModel.Email+"' AND password = '"+userViewModel.Password+"'";                    
                     daProducts = new MySqlDataAdapter(sql, sqlConnection);
                     MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
