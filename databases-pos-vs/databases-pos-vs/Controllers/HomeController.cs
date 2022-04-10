@@ -70,6 +70,7 @@ namespace databases_pos_vs.Controllers
                 HttpContext.Response.Cookies.Append("Sum", Price.ToString());
             }
 
+
             if (HttpContext.Request.Cookies.ContainsKey("Qty"))
             {
                 float newSum = Int32.Parse(HttpContext.Request.Cookies["Qty"]) + 1;
@@ -89,7 +90,7 @@ namespace databases_pos_vs.Controllers
 
         public IActionResult Cart()
         {
-            /*
+            
             MySqlDataAdapter daProducts;
             DataTable dtbl = new DataTable();
 
@@ -102,8 +103,8 @@ namespace databases_pos_vs.Controllers
                 MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
                 daProducts.Fill(dtbl);
             
-            }*/
-            return View();
+            }
+            return View(dtbl);
                
         }
 
@@ -126,7 +127,7 @@ namespace databases_pos_vs.Controllers
 
         
         [HttpPost]
-        public IActionResult Checkout([Bind("Customer_id, Paymnet_Method, Order_date, Shipping_Address")] TransactionViewModel transactionViewModel)
+        public IActionResult Checkout([Bind("Payment_Method, Shipping_Address")] TransactionViewModel transactionViewModel)
         {
             using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
             {
@@ -139,30 +140,58 @@ namespace databases_pos_vs.Controllers
 
                 string userId = HttpContext.Request.Cookies["id"];
                 string productCost = HttpContext.Request.Cookies["Sum"];
+                string totalCost = (Int32.Parse(productCost) + 12).ToString();
+
+                string today = DateTime.Today.ToString();
+
                 //string query = "INSERT INTO Transaction_Info(customer_id, payment_method, order_date, shipping_address, product_cost, shipping_cost, total_cost)";
-                string query = String.Format("INSERT INTO Transaction_Info({0}, {1}, {2}, {3},)", userId);
+                //string query = String.Format("INSERT INTO Transaction_Info(customer_id, payment_method, order_date, shipping_address, product_cost, shipping_cost, total_cost) " +
+                //    "VALUES({0}, \"{1}\", \"{2}\", \"{3}\", \"{4}\", {5}, \"{6})\"", userId, transactionViewModel.Payment_Method, today, transactionViewModel.Shipping_Address,
+                //    productCost, "12", totalCost );
 
-                MySqlCommand cmd = new MySqlCommand(query, sqlConnection);
-
-                MySqlCommand sqlCmd = new MySqlCommand("Select_most_recent_trxInfo", sqlConnection);
+                MySqlCommand sqlCmd = new MySqlCommand("CreateNewTransaction", sqlConnection);
                 sqlCmd.CommandType = CommandType.StoredProcedure;
+                sqlCmd.Parameters.AddWithValue("@Customer_id", Int32.Parse(userId));
+                sqlCmd.Parameters.AddWithValue("@Payment_method", transactionViewModel.Payment_Method);
+                sqlCmd.Parameters.AddWithValue("@Order_date", today);
+                sqlCmd.Parameters.AddWithValue("@Shipping_address", transactionViewModel.Shipping_Address);
+                sqlCmd.Parameters.AddWithValue("@Product_cost", totalCost);
+                sqlCmd.Parameters.AddWithValue("@Total_cost", Double.Parse(totalCost) + 12 );
 
-                sqlCmd.Parameters.Add("@trxInfoId", MySqlDbType.Int32);
-                sqlCmd.Parameters["@trxInfoId"].Direction = ParameterDirection.Output;
 
                 sqlCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Tranx number: " + sqlCmd.Parameters["@trxInfoId"].Value);
 
-                int transactionInfoId = Int32.Parse(sqlCmd.Parameters["@trxInfoId"].Value.ToString());
+
+
+
+                
+                MySqlCommand sqlCmd2 = new MySqlCommand("Select_most_recent_trxInfo", sqlConnection);
+                sqlCmd2.CommandType = CommandType.StoredProcedure;
+
+                sqlCmd2.Parameters.Add("@info", MySqlDbType.Int32);
+                sqlCmd2.Parameters["@info"].Direction = ParameterDirection.Output;
+                sqlCmd2.Parameters.AddWithValue("@input", 11);
+
+
+                sqlCmd2.ExecuteNonQuery();
+                
+
+
+                int transactionInfoId = Int32.Parse(sqlCmd.Parameters["@info"].Value.ToString());
+                //string transactionInfoId = "9";
                
                 string productIdsString = HttpContext.Request.Cookies["CartCookie"];
 
                 string[] productIds = productIdsString.Split(",");
+                string qty = HttpContext.Request.Cookies["Qty"];
 
                 foreach (var id in productIds)
                 {
                     //INSERT INTO Transactions(FK_transactioninfoID, productId, quantity) VALUES(transactionInfoId, Quantity);
-                    string transQuery = String.Format("INSERT INTO Transactions({0}, {1}, {2} )");
+                    string transQuery = String.Format("INSERT INTO Transactions(transaction_info_id, product_id, quantity) VALUES({0}, {1}, \"{2}\" )", transactionInfoId, id, qty );
+                    MySqlCommand transCmd = new MySqlCommand(transQuery, sqlConnection);
+                    MySqlDataReader rdrr = transCmd.ExecuteReader();
+                    rdrr.Close();
                 }
 
 

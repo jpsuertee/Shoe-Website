@@ -123,6 +123,7 @@ namespace databseApp.Controllers
                     sqlCmd.Parameters.AddWithValue("@Image_url", productViewModel.Image_url);
 
 
+
                     sqlCmd.ExecuteNonQuery();
                 }
                 return RedirectToAction(nameof(Index));
