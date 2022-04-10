@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "All Products   ";
 }
 
@@ -21,7 +20,20 @@
                         <p class="card-text">@Model.Rows[i]["Price"]</p>
                         <p class="card-text">@Model.Rows[i]["Size"]</p>
 
-                        <a href="#" class="btn btn-primary">Add to Cart</a>
+                
+                        <div class="btn btn-light">
+
+                            @Html.ActionLink("Add To Cart", "AddToCart", new
+                            {
+                                id = @Model.Rows[i]["Product_id"],
+                        name = Model.Rows[i]["Name"]
+                            })
+
+                        </div>
+                           
+
+
+
                     </div>
 
 
