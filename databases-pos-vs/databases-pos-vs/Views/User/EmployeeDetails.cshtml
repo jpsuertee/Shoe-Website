@@ -1,0 +1,21 @@
+@model databseApp.Models.UserViewModel
+@{
+    ViewData["Title"] = "Your Details";
+}
+
+<div class="jumbotron">
+	<h1>@ViewData["Title"]</h1>
+</div>
+
+
+<table class="table table-bordered">
+
+
+</table>
+
+
+<h1> testing employee</h1>
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -12,12 +12,13 @@ namespace databases_pos_vs.Controllers
 {
     public class VendorController : Controller
     {
+        /*
         private readonly databases_pos_vsContext _context;
 
         public VendorController()
         {
           
-        }
+        }*/
 
         // GET: Vendor
         public ActionResult Index()
@@ -25,7 +26,7 @@ namespace databases_pos_vs.Controllers
             return View();
         }
 
-
+        /*
 
         // GET: Vendor/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -77,7 +78,7 @@ namespace databases_pos_vs.Controllers
             }
             return View(vendorViewModel);
         }
-
+        
         // GET: Vendor/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -111,5 +112,6 @@ namespace databases_pos_vs.Controllers
         {
             return _context.VendorViewModel.Any(e => e.InventoryID == id);
         }
+        */
     }
 }

@@ -23,6 +23,10 @@ namespace databseApp.Controllers
             this._configuration = configuration;
         }
 
+
+
+
+
         public IActionResult Data()
         {
             MySqlDataAdapter daTransactions;

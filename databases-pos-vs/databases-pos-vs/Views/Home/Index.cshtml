@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "All Products   ";
 }
 
@@ -21,12 +20,58 @@
                         <p class="card-text">@Model.Rows[i]["Price"]</p>
                         <p class="card-text">@Model.Rows[i]["Size"]</p>
 
-                        <a href="#" class="btn btn-primary">Add to Cart</a>
+                        @if (Context.Request.Cookies.ContainsKey("email"))
+                        {
+                            <button type="button" class="btn btn-primary">
+
+                                @Html.ActionLink("Add To Cart", "AddToCart", new
+                                {
+                                    id = @Model.Rows[i]["Product_id"],
+                            name = Model.Rows[i]["Name"]
+                                })
+
+                            </button>
+
+                        }
+                        else
+                        {
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                                Add To Cart
+                            </button>
+
+                        }
+
+
+
+
+
                     </div>
 
 
                 </div>
             </div>
         }
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                You must be signed in to add an item to your cart
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a href="/User/UserIndex"class="btn btn-primary">Login</a>
+            </div>
+        </div>
     </div>
 </div>

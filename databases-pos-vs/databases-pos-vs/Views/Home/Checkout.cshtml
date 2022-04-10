@@ -1,0 +1,59 @@
+﻿@model databseApp.Models.TransactionViewModel
+@{
+    ViewData["Title"] = "Checkout   ";
+}
+
+<div class="jumbotron">
+	<h1>@ViewData["Title"]</h1>
+</div>
+
+<form asp-action="Create">
+	<div class="row">
+		<div class="col-50">
+			<h3>Customer Information</h3>
+			<div>Customer ID: </div>
+			<div>First Name: </div>
+			<div>Last Name: </div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-50">
+			<h3>Shipping Address</h3>
+			<label asp-for="Shipping_Address"><i class="fa fa-address-card-o"></i> Shipping Address</label>
+			<input type="text" asp-for="Shipping_Address" placeholder="542 W. 15th Street">
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-50">
+			<h3>Payment</h3>
+			<label asp-for="Payment_Method">Type of Card</label>
+			<input asp-for="Payment_Method" type="text" placeholder="John More Doe">
+			<label for="ccnum">Credit card number</label>
+			<input type="text" id="ccnum" name="cardnumber" placeholder="1111-2222-3333-4444">
+			<label for="expmonth">Exp Month</label>
+			<input type="text" id="expmonth" name="expmonth" placeholder="September">
+
+			<div class="row">
+				<div class="col-50">
+					<label for="expyear">Exp Year</label>
+					<input type="text" id="expyear" name="expyear" placeholder="2018">
+				</div>
+				<div class="col-50">
+					<label for="cvv">CVV</label>
+					<input type="text" id="cvv" name="cvv" placeholder="352">
+				</div>
+			</div>
+		</div>
+	</div>
+	<input type="submit" value="Purchase!" class="btn">
+</form>
+
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+
+
