@@ -155,7 +155,7 @@ namespace databases_pos_vs.Controllers
                 sqlCmd1.Parameters.AddWithValue("@Order_date", today);
                 sqlCmd1.Parameters.AddWithValue("@Shipping_address", transactionViewModel.Shipping_Address);
                 sqlCmd1.Parameters.AddWithValue("@Product_cost", totalCost);
-                sqlCmd1.Parameters.AddWithValue("@Total_cost", Double.Parse(totalCost) + 12 );
+                sqlCmd1.Parameters.AddWithValue("@Total_cost", Double.Parse(totalCost));
 
 
                 sqlCmd1.ExecuteNonQuery();
