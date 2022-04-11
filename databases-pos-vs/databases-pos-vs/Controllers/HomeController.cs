@@ -193,7 +193,7 @@ namespace databases_pos_vs.Controllers
                 foreach (var id in productIds)
                 {
                     //INSERT INTO Transactions(FK_transactioninfoID, productId, quantity) VALUES(transactionInfoId, Quantity);
-                    string transQuery = String.Format("INSERT INTO Transactions(transaction_info_id, product_id, quantity) VALUES({0}, {1}, \"{2}\" )", result, id, qty );
+                    string transQuery = String.Format("INSERT INTO Transactions(transaction_info_id, product_id, quantity, inventory_id) VALUES({0}, {1}, \"{2}\",{3} )", result, id, qty, id);
                     MySqlCommand transCmd = new MySqlCommand(transQuery, sqlConnection);
                     MySqlDataReader rdrr = transCmd.ExecuteReader();
                     rdrr.Close();
