@@ -111,8 +111,8 @@ namespace databases_pos_vs.Controllers
 
         public IActionResult Checkout()
         {
-            //UserViewModel userViewModel = FetchUserByID();    ADD LATER
-            return View();
+            UserViewModel userViewModel = FetchUserByID();  
+            return View(userViewModel);
         }
         //checkout controller
         //1. SQL query for creating new Transaction_Info entry
@@ -205,5 +205,41 @@ namespace databases_pos_vs.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
+        public UserViewModel FetchUserByID()
+        {
+            UserViewModel userViewModel = new UserViewModel();
+            using (MySqlConnection sqlConnection = new MySqlConnection(_configuration.GetConnectionString("DevConnection")))
+            {
+                MySqlDataAdapter daProducts;
+                DataTable dtbl = new DataTable();
+                int userid = Int32.Parse(Request.Cookies["id"]);
+                string userrole = Request.Cookies["role"];
+                string sql;
+
+                sqlConnection.Open();
+
+                    sql = string.Format("SELECT * FROM Users, Customers WHERE Users.user_id = '"+userid+"' AND Customers.CustomerID = '"+userid+"'");
+               
+                daProducts = new MySqlDataAdapter(sql, sqlConnection);
+                MySqlCommandBuilder cb = new MySqlCommandBuilder(daProducts);
+                daProducts.Fill(dtbl);
+
+                    userViewModel.UserID = userid;
+                    userViewModel.Role = userrole; 
+                    userViewModel.Password = dtbl.Rows[0]["password"].ToString();
+                    userViewModel.FirstName_ = dtbl.Rows[0]["FirstName"].ToString(); 
+                    userViewModel.LastName_ = dtbl.Rows[0]["LastName"].ToString(); 
+                    userViewModel.Email = dtbl.Rows[0]["email"].ToString(); 
+                    userViewModel.Address = dtbl.Rows[0]["Address"].ToString(); 
+                    userViewModel.City = dtbl.Rows[0]["City"].ToString(); 
+                    userViewModel.State = dtbl.Rows[0]["State"].ToString(); 
+                    userViewModel.Zipcode = dtbl.Rows[0]["Zipcode"].ToString(); 
+
+ 
+                return userViewModel;
+            }
+        }
     }
 }
