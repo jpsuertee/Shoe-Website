@@ -1,4 +1,4 @@
-﻿m@{
+﻿@{
     ViewData["Title"] = "Cart";
 }
 
@@ -38,6 +38,7 @@
                 <td>
                     <a asp-action="Delete" asp-route-id="@Model.Rows[i]["product_id"]">Delete</a>
                 </td>
+
             </tr>
         }
     </tbody>

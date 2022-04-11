@@ -1,0 +1,56 @@
+@model databseApp.Models.UserViewModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<section class="loginform cf">
+    <form asp-action="Create">
+		<ul>
+			<li>
+				<label asp-for="FirstName_">First Name</label>
+				<input asp-for="FirstName_" type="text" name="FirstName_" placeholder="John" required>
+			</li>
+			<li>
+				<label asp-for="LastName_">Last Name</label>
+				<input asp-for="LastName_" type="text" name="LastName_" placeholder="Smith" required>
+			</li>
+
+			<li>
+				<label asp-for="Email">Email</label>
+				<input asp-for="Email" type="email" name="Email" placeholder="yourname@email.com" required>
+			</li>
+			<li>
+				<label asp-for="Password">Password</label>
+				<input asp-for="Password" name="Password" placeholder="Password" required>
+			<li>
+				<label asp-for="Address">Address</label>
+				<input asp-for="Address" type="text" name="Address" required>
+			</li>
+			<li>
+				<label asp-for="City">City</label>
+				<input asp-for="City" type="text" name="City" required>
+			</li>
+			<li>
+				<label asp-for="State">State</label>
+				<input asp-for="State" type="text" name="State" required>
+			</li>
+			<li>
+				<label asp-for="Zipcode">Zipcode</label>
+				<input asp-for="Zipcode" type="text" name="Zipcode" required>
+			
+
+			<br />
+			<br />
+			<select asp-for="Role">
+				<option value="" style="display:none">Choose an account</option>
+				<option value="customer">Customer</option>
+				<option value="employee">Employee</option>
+			</select>
+			<br />
+			<input type="submit" value="Next">
+		</ul>
+    </form>
+</section>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

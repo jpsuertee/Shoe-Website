@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using databases_pos_vs.Data;
 
 namespace databases_pos_vs
 {
@@ -23,6 +25,9 @@ namespace databases_pos_vs
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddDbContext<databases_pos_vsContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("databases_pos_vsContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
